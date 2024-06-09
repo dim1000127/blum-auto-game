@@ -1,37 +1,66 @@
-import requests as req
-import json
-import time
-import random
+import os.path
+import asyncio
+from itertools import zip_longest
+from data import config
+from blum.blum import Blum
 
 
-def main(jwt, proxies, user_agent):
-    session = req.Session()
-    session.proxies = proxies
+def check_data_files():
+    files_is_exists = True
+    if not os.path.exists("data/proxy.txt"):
+        f = open("data/proxy.txt", "w")
+        f.close()
+        files_is_exists = False
 
-    head = {
-        'Authorization': 'Bearer' + jwt,
-        'Accept': 'application/json',
-        'User-Agent': user_agent
-    }
-    resp = session.get('https://game-domain.blum.codes/api/v1/user/balance', headers=head, proxies=proxies)
-    count = json.loads(resp.text)['playPasses']
-    total_point = 0
-    if count != 0:
-        print("Начал играть...")
-        for i in range(count):
-            post_id = session.post('https://game-domain.blum.codes/api/v1/game/play', headers=head, proxies=proxies)
-            id = json.loads(post_id.text)['gameId']
-            time.sleep(random.randrange(30, 60, 5))
-            points = random.randint(150, 220)
-            endGame = session.post('https://game-domain.blum.codes/api/v1/game/claim', headers=head, json={
-                "gameId": id, "points": points}, proxies=proxies)
-            print(str(i + 1) + ' / ' + str(count) + " игр." + " Очки за игру - " + str(points))
-            time.sleep(random.randint(1, 5))
-            total_point += points
-        print("Всего зафармленно поинтов:", total_point)
-    else:
-        print("Нету кристалов для игры :(")
-        exit()
+    if not os.path.isfile("data/access_key.txt"):
+        f = open("data/access_key.txt", "w")
+        f.close()
+        files_is_exists = False
+
+    if not os.path.isfile("data/user_agent.txt"):
+        f = open("data/user_agent.txt", "w")
+        f.close()
+        files_is_exists = False
+
+    return files_is_exists
+
+
+async def main():
+    if not check_data_files():
+        print("There were not all data files. The script has been stopped")
+        return
+
+    action = int(input("To start the farm, press 1>"))
+
+    if action == 1:
+        print("Start farming")
+
+        tasks = []
+
+        with open("data/access_key.txt", "r") as access_key_file:
+            access_key_arr = [line.strip() for line in access_key_file]
+
+        with open("data/user_agent.txt", "r") as user_agent_file:
+            user_agent_arr = [line.strip() for line in user_agent_file]
+
+        with open("data/proxy.txt", "r") as proxy_file:
+            proxy_arr = [line.strip() for line in proxy_file]
+
+        i = 0
+        for access_key, user_agent, proxy in zip_longest(access_key_arr, user_agent_arr, proxy_arr, fillvalue=""):
+            i += 1
+
+            if access_key == "":
+                continue
+
+            tasks.append(asyncio.create_task(Blum(i, jwt=access_key, proxy=proxy, user_agent=user_agent).start_game()))
+
+        await asyncio.gather(*tasks)
+
 
 if __name__ == '__main__':
-    print("Test")
+    print(config.HELLO_MESSAGE)
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    loop.run_until_complete(main())
+    loop.close()
