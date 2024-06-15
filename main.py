@@ -1,61 +1,57 @@
 import os.path
 import asyncio
-from itertools import zip_longest
+import random
+from asyncio import sleep
+
 from data import config
 from blum.blum import Blum
-
-
-def check_data_files():
-    files_is_exists = True
-    if not os.path.exists("data/proxy.txt"):
-        f = open("data/proxy.txt", "w")
-        f.close()
-        files_is_exists = False
-
-    if not os.path.isfile("data/access_key.txt"):
-        f = open("data/access_key.txt", "w")
-        f.close()
-        files_is_exists = False
-
-    if not os.path.isfile("data/user_agent.txt"):
-        f = open("data/user_agent.txt", "w")
-        f.close()
-        files_is_exists = False
-
-    return files_is_exists
+from utils.accounts import create_session, get_accounts
 
 
 async def main():
-    if not check_data_files():
-        print("There were not all data files. The script has been stopped")
+    if not os.path.exists('data/secret_key.py'):
+        print("Getting started: fill secret_key.py")
+        secret_key_file = open("secret_key.py", "w+")
+        secret_key_file.write("API_ID = 12345\nAPI_HASH = 12345")
+        secret_key_file.close()
         return
 
-    action = int(input("To start the farm, press 1>"))
+    action = int(input("Select action:\n1. Start farm\n2. Create sessions\n\n"))
+
+    if not os.path.exists('sessions'):
+        os.mkdir('sessions')
+
+    if not os.path.exists('sessions/accounts.json'):
+        with open("sessions/accounts.json", 'w') as f:
+            f.write("[]")
+
+    if action == 2:
+        await create_session()
 
     if action == 1:
         print("Start farming")
 
-        tasks = []
+        accounts = await get_accounts()
 
-        with open("data/access_key.txt", "r") as access_key_file:
-            access_key_arr = [line.strip() for line in access_key_file]
+        start_tasks = []
+        for number, account in enumerate(accounts):
+            start_tasks.append(start(number, account))
 
-        with open("data/user_agent.txt", "r") as user_agent_file:
-            user_agent_arr = [line.strip() for line in user_agent_file]
+        await asyncio.gather(*start_tasks)
 
-        with open("data/proxy.txt", "r") as proxy_file:
-            proxy_arr = [line.strip() for line in proxy_file]
 
-        i = 0
-        for access_key, user_agent, proxy in zip_longest(access_key_arr, user_agent_arr, proxy_arr, fillvalue=""):
-            i += 1
+async def start(number, account):
+    session_name, phone_number, proxy, user_agent = account.values()
+    blum_client = Blum(number=number, session_name=session_name, phone_number=phone_number,
+                       proxy=proxy, user_agent=user_agent)
 
-            if access_key == "":
-                continue
+    await asyncio.sleep(random.randint(*config.ACC_DELAY))
+    await blum_client.login()
 
-            tasks.append(asyncio.create_task(Blum(i, jwt=access_key, proxy=proxy, user_agent=user_agent).start_game()))
+    await sleep(random.uniform(10, 20))
+    await blum_client.start_game()
 
-        await asyncio.gather(*tasks)
+    await blum_client.close_session()
 
 
 if __name__ == '__main__':

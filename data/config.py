@@ -1,3 +1,8 @@
+from data import secret_key
+
+API_ID = secret_key.API_ID
+API_HASH = secret_key.API_HASH
+
 # delay between the start of the game on the account
 ACC_DELAY = [5, 15]
 
@@ -5,12 +10,18 @@ ACC_DELAY = [5, 15]
 POINTS = [150, 220] #[min, max]
 
 # minimum diamond balance
-MIN_TICKETS = 20
+MIN_TICKETS = [55, 61] #[min, max]
 
 DURATION_GAME = [30, 60] #[min, max]
 
 # delay between game
 SLEEP_GAME_TIME = [5, 20] #[min, max]
+
+# session folder (do not change)
+WORKDIR = "sessions/"
+
+# timeout in seconds for checking accounts on valid
+TIMEOUT = 30
 
 HELLO_MESSAGE = '''
 ██████╗░███████╗██╗░░░██╗░░░░░░███████╗██╗░░░░░██╗██████╗░██████╗░███████╗██████╗░░██████╗
