@@ -7,15 +7,15 @@ API_HASH = secret_key.API_HASH
 ACC_DELAY = [5, 15]
 
 # points each game
-POINTS = [150, 220] #[min, max]
+POINTS = [150, 200] #[min, max]
 
 # minimum diamond balance
-MIN_TICKETS = [55, 61] #[min, max]
+MIN_TICKETS = [20, 30] #[min, max]
 
 DURATION_GAME = [30, 60] #[min, max]
 
 # delay between game
-SLEEP_GAME_TIME = [5, 20] #[min, max]
+SLEEP_GAME_TIME = [3, 8] #[min, max]
 
 # session folder (do not change)
 WORKDIR = "sessions/"

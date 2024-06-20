@@ -57,7 +57,8 @@ async def create_session():
             "session_name": session_mame,
             "phone_number": phone_number,
             "proxy": proxy,
-            "user_agent": user_agent
+            "user_agent": user_agent,
+            "is_available": True
         })
         logger.success(f'Added a account {me.username} ({me.first_name}) | {me.phone_number}')
 
@@ -71,7 +72,7 @@ def get_available_accounts(sessions: list):
     available_accounts = []
     for session in sessions:
         for saved_account in accounts_from_json:
-            if saved_account['session_name'] == session:
+            if saved_account['session_name'] == session and saved_account['is_available']:
                 available_accounts.append(saved_account)
                 break
 
@@ -106,7 +107,7 @@ async def get_accounts():
 
 
 async def check_valid_account(account: dict):
-    session_name, phone_number, proxy, user_agent = account.values()
+    session_name, phone_number, proxy, user_agent, is_available = account.values()
 
     try:
         proxy_dict = {

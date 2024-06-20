@@ -41,7 +41,7 @@ async def main():
 
 
 async def start(number, account):
-    session_name, phone_number, proxy, user_agent = account.values()
+    session_name, phone_number, proxy, user_agent, is_available = account.values()
     blum_client = Blum(number=number, session_name=session_name, phone_number=phone_number,
                        proxy=proxy, user_agent=user_agent)
 

@@ -51,36 +51,41 @@ class Blum:
         await self.session.close()
 
     async def start_game(self):
-        balance_response = await self.session.get(url='https://game-domain.blum.codes/api/v1/user/balance')
-        balance_json = await balance_response.json()
-        tickets_count = balance_json.get('playPasses')
+        try:
+            balance_response = await self.session.get(url='https://game-domain.blum.codes/api/v1/user/balance')
+            balance_json = await balance_response.json()
+            tickets_count = balance_json.get('playPasses')
+            logger.success(F"Blum - {str(self.session_name)}. Ticket balance - {tickets_count}")
+            await asyncio.sleep(random.randint(1, 3))
 
-        total_point = 0
-        min_tickets = random.randint(*config.MIN_TICKETS)
-        if tickets_count > min_tickets:
-            print("Game started...")
-            games_count = tickets_count - min_tickets
-            for i in range(games_count):
-                post_id_response = await self.session.post(url='https://game-domain.blum.codes/api/v1/game/play')
-                post_id_json = await post_id_response.json()
-                game_id = post_id_json.get('gameId')
+            total_point = 0
+            min_tickets = random.randint(*config.MIN_TICKETS)
+            if tickets_count > min_tickets:
+                games_count = tickets_count - min_tickets
+                for i in range(games_count):
+                    post_id_response = await self.session.post(url='https://game-domain.blum.codes/api/v1/game/play')
+                    post_id_json = await post_id_response.json()
+                    game_id = post_id_json.get('gameId')
+                    logger.success(F"Blum - {str(self.session_name)}. Play started")
 
-                await asyncio.sleep(random.randint(*config.DURATION_GAME))
+                    await asyncio.sleep(random.randint(*config.DURATION_GAME))
 
-                points = random.randint(*config.POINTS)
-                await self.session.post(url='https://game-domain.blum.codes/api/v1/game/claim', json={
-                    "gameId": game_id, "points": points})
+                    points = random.randint(*config.POINTS)
+                    await self.session.post(url='https://game-domain.blum.codes/api/v1/game/claim', json={
+                        "gameId": game_id, "points": points})
 
-                print("Blum - " + str(self.session_name) + "\n" +
-                      str(i + 1) + ' / ' + str(games_count) + " games." +
-                      " Points per game - " + str(points) + "\n")
+                    logger.success(
+                        F"Blum - {str(self.session_name)}\n{str(i + 1)} / {str(games_count)} games. Points per "
+                        F"game - {str(points)}\n")
 
-                await asyncio.sleep(random.randint(*config.SLEEP_GAME_TIME))
+                    await asyncio.sleep(random.randint(*config.SLEEP_GAME_TIME))
 
-                total_point += points
-            print("Total points earned:", total_point)
-        else:
-            print("Not enough tickets")
+                    total_point += points
+                logger.info(F"Blum - {str(self.session_name)} Total points earned: {total_point}")
+            else:
+                logger.info("Not enough tickets")
+        except Exception as e:
+            logger.exception(e)
 
     async def login(self):
         self.session.headers.pop('Authorization', None)
