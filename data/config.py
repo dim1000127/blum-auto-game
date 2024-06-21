@@ -10,7 +10,7 @@ ACC_DELAY = [5, 15]
 POINTS = [150, 200] #[min, max]
 
 # minimum diamond balance
-MIN_TICKETS = [20, 30] #[min, max]
+MIN_TICKETS = [50, 60] #[min, max]
 
 DURATION_GAME = [30, 60] #[min, max]
 

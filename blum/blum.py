@@ -55,7 +55,7 @@ class Blum:
             balance_response = await self.session.get(url='https://game-domain.blum.codes/api/v1/user/balance')
             balance_json = await balance_response.json()
             tickets_count = balance_json.get('playPasses')
-            logger.success(F"Blum - {str(self.session_name)}. Ticket balance - {tickets_count}")
+            logger.info(F"Blum - {str(self.session_name)}. Ticket balance - {tickets_count}")
             await asyncio.sleep(random.randint(1, 3))
 
             total_point = 0
@@ -66,7 +66,7 @@ class Blum:
                     post_id_response = await self.session.post(url='https://game-domain.blum.codes/api/v1/game/play')
                     post_id_json = await post_id_response.json()
                     game_id = post_id_json.get('gameId')
-                    logger.success(F"Blum - {str(self.session_name)}. Play started")
+                    logger.info(F"Blum - {str(self.session_name)}. Play started")
 
                     await asyncio.sleep(random.randint(*config.DURATION_GAME))
 
