@@ -43,7 +43,7 @@ class Blum:
             'Accept': 'application/json',
             'User-Agent': user_agent if not user_agent == "" else UserAgent(os='android').random
         }
-        connector = ProxyConnector.from_url(self.proxy)
+        connector = ProxyConnector.from_url(self.proxy) if self.proxy else aiohttp.TCPConnector(verify_ssl=False)
         self.session = aiohttp.ClientSession(headers=headers, trust_env=True, connector=connector,
                                              timeout=aiohttp.ClientTimeout(120))
 
@@ -75,7 +75,7 @@ class Blum:
                         "gameId": game_id, "points": points})
 
                     logger.success(
-                        F"Blum - {str(self.session_name)}\n{str(i + 1)} / {str(games_count)} games. Points per "
+                        F"Blum - {str(self.session_name)}. {str(i + 1)} / {str(games_count)} games. Points per "
                         F"game - {str(points)}\n")
 
                     await asyncio.sleep(random.randint(*config.SLEEP_GAME_TIME))
@@ -126,5 +126,5 @@ class Blum:
             hash_ = query.split('&hash=')[1]
 
             return f"query_id={query_id}&user={user}&auth_date={auth_date}&hash={hash_}"
-        except:
-            return None
+        except Exception as e:
+            logger.exception(e)
