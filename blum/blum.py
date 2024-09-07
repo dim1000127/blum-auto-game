@@ -98,7 +98,7 @@ class Blum:
 
         json_data = {"query": query}
         token_response = await self.session.post(
-            "https://gateway.blum.codes/v1/auth/provider/PROVIDER_TELEGRAM_MINI_APP", json=json_data)
+            "https://user-domain.blum.codes/api/v1/auth/provider/PROVIDER_TELEGRAM_MINI_APP", json=json_data)
         token_response_json = await token_response.json()
 
         self.session.headers['Authorization'] = f"Bearer {token_response_json.get("token").get("access")}"
